@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Optical File Transfer</title>
+<style>
+  :root{--bg:#07111f;--panel:#101f33;--panel2:#0c192a;--line:#29415f;--text:#e8f1ff;--muted:#9db0c9;--blue:#69b7ff;--green:#64d9ac;--amber:#ffca69;--red:#ff8293;--shadow:0 18px 55px #0007}
+  *{box-sizing:border-box}
+  html,body{-webkit-text-size-adjust:100%}
+  body{margin:0;min-width:300px;background:radial-gradient(1100px 600px at 50% -100px,#17365d 0%,var(--bg) 60%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{max-width:1150px;margin:auto;padding:28px 22px 12px;display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap} h1{font-size:clamp(23px,4vw,34px);margin:0;letter-spacing:-.04em} h1 span{color:var(--blue)} .tag{border:1px solid #32628f;border-radius:999px;color:#b9dafb;padding:5px 10px;font-size:12px;white-space:nowrap}
+  main{max-width:1150px;margin:auto;padding:12px 22px 36px}.intro{color:var(--muted);max-width:800px;margin:0 0 20px}.notice{border:1px solid #6f5526;background:#32281288;color:#ffe2a2;border-radius:12px;padding:11px 13px;margin:0 0 18px;font-size:13px}.notice strong{color:#fff0c8}.notice code{color:#ffe9b8}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.card{background:linear-gradient(145deg,#13263e,var(--panel2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px;overflow:hidden}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:17px}.card h2{font-size:20px;margin:0;letter-spacing:-.02em}.sub{color:var(--muted);font-size:13px;margin:4px 0 0}.step{font-size:12px;font-weight:700;color:#07111f;background:var(--blue);padding:3px 7px;border-radius:99px}
+  .pick{display:block;border:1.5px dashed #48749e;border-radius:14px;background:#0b192a;padding:20px;text-align:center;cursor:pointer;transition:.16s;-webkit-tap-highlight-color:transparent}.pick:hover{background:#10243b;border-color:var(--blue)}.pick:focus-within{outline:2px solid var(--blue);outline-offset:2px}.pick input{display:none}.pick strong{display:block;font-size:16px}.pick span{color:var(--muted);font-size:13px}.file-name{min-height:22px;margin:9px 1px 0;color:#cfe2f9;font-size:13px;overflow-wrap:anywhere}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0 10px}
+  button,.download{appearance:none;-webkit-appearance:none;border:0;border-radius:10px;background:#2a4d73;color:white;padding:10px 13px;font:600 14px inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;transition:.16s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  button:hover,.download:hover{filter:brightness(1.13)}button:focus-visible,.download:focus-visible{outline:2px solid var(--blue);outline-offset:2px}button:disabled{opacity:.45;cursor:not-allowed;filter:none}.primary{background:linear-gradient(135deg,#337fc2,#4ea7ee)}.good{background:#21775f}.danger{background:#6d3040}.quiet{background:#24364b}.download{background:#23785d;display:none}
+  .range-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin-top:12px}input[type=range]{accent-color:var(--blue);width:100%;height:32px;touch-action:manipulation}.meter{height:9px;border-radius:99px;background:#07121f;overflow:hidden;border:1px solid #29425c}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .2s}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.stat{border:1px solid #24415e;background:#0a1726;border-radius:10px;padding:9px;min-width:0}.stat b{display:block;color:#eaf4ff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat span{display:block;color:#8ea5bf;font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}.status{min-height:23px;margin:13px 0 0;font-size:13px;color:#b7d5ef}.status.ok{color:#83e8bd}.status.warn{color:#ffda89}.status.error{color:#ff9eab}
+  .qr-stage{display:grid;place-items:center;background:#fff;border-radius:15px;padding:13px;margin:12px auto 0;max-width:min(100%,520px);aspect-ratio:1}.qr-stage canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.empty-qr{color:#506070;text-align:center;font-size:14px}
+  .video-wrap{background:#02070c;border:1px solid #29415e;border-radius:15px;overflow:hidden;aspect-ratio:4/3;position:relative}.video-wrap video{width:100%;height:100%;object-fit:cover;display:block;-webkit-transform:translateZ(0)}.scan-overlay{position:absolute;inset:13%;border:2px solid #8ed0ff;border-radius:12px;box-shadow:0 0 0 999px #0003;pointer-events:none}.scan-dot{position:absolute;width:10px;height:10px;background:#68e8ae;border-radius:50%;right:15px;top:15px;box-shadow:0 0 14px #68e8ae}.scan-dot.off{background:#ffcf74;box-shadow:0 0 14px #ffcf74}.scan-placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#a9bed2}
+  .progress-label{display:flex;justify-content:space-between;gap:8px;margin:15px 0 6px;font-size:13px;color:#c5d8e9}.missing{border-left:3px solid #496f94;padding-left:9px;color:#9eb4c9;font-size:12px;margin-top:10px;min-height:18px;overflow-wrap:anywhere}details{margin-top:15px;border-top:1px solid #28425e;padding-top:12px;color:var(--muted);font-size:13px}summary{cursor:pointer;color:#cbe4fa;padding:6px 0}
+  textarea{display:block;width:100%;min-height:80px;margin-top:9px;border-radius:10px;border:1px solid #345674;background:#07131f;color:#ddedfb;font:16px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:9px;resize:vertical;-webkit-appearance:none}
+  .manual-row{display:flex;gap:9px;align-items:center;margin-top:9px;flex-wrap:wrap}.foot{max-width:1150px;margin:0 auto;padding:0 22px 35px;color:#88a0b9;font-size:12px}.foot code{color:#b5daf8}
+  .cam-pick{display:flex;gap:9px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}.cam-pick select{flex:1;min-width:0;background:#07131f;color:#ddedfb;border:1px solid #345674;border-radius:9px;padding:10px;font:16px inherit;-webkit-appearance:none;appearance:none}
+  .diag-out{margin-top:10px;background:#07131f;border:1px solid #345674;border-radius:10px;padding:10px;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;color:#cfe2f9;white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto}
+  @media(max-width:780px){header{padding:21px 15px 8px;align-items:flex-start}main{padding:10px 15px 24px}.grid{grid-template-columns:1fr;gap:14px}.card{padding:16px}.foot{padding:0 15px 28px}button,.download{font-size:15px;padding:12px 14px}}
+  @media(max-width:380px){.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:span 2}}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<header><div><h1>Optical <span>File Transfer</span></h1><p class="sub">An offline, camera-to-screen file bridge.</p></div><div class="tag">one self-contained HTML file</div></header>
+<main>
+  <p class="intro">Open this page on two devices. The sender turns a file into repeating QR frames; the receiver scans them and rebuilds the original. The transfer itself uses light — there is no server, pairing, account, or shared Wi-Fi.</p>
+  <p class="notice" id="contextNotice"><strong>Camera note:</strong> sending works offline anywhere. Camera scanning needs a secure origin (HTTPS or <code>localhost</code>). A built-in pure-JS QR decoder means Safari on iOS, Chrome on Android, and desktop browsers all work — no <code>BarcodeDetector</code> required.</p>
+  <div class="grid">
+    <section class="card" aria-labelledby="sendTitle">
+      <div class="card-head"><div><h2 id="sendTitle">Send</h2><p class="sub">Choose any file, then show the QR code to the other device.</p></div><span class="step">1</span></div>
+      <label class="pick"><input id="fileInput" type="file"><strong>Choose a file</strong><span>Nothing leaves this device.</span></label>
+      <div id="fileName" class="file-name" aria-live="polite">No file selected.</div>
+      <div class="range-row"><label for="fps">Target pace</label><input id="fps" type="range" min="5" max="30" value="30"><output id="fpsOut" for="fps">30 FPS</output></div>
+      <div class="controls"><button id="startSend" class="primary" disabled>Start broadcast</button><button id="pauseSend" class="quiet" disabled>Pause</button><button id="cancelSend" class="danger" disabled>Cancel</button></div>
+      <div class="qr-stage" id="qrStage"><div class="empty-qr">Select a file to prepare the first QR frame.</div></div>
+      <div class="progress-label"><span id="sendProgressLabel">Broadcast pass</span><span id="sendProgress">—</span></div><div class="meter"><i id="sendMeter"></i></div>
+      <div class="stats"><div class="stat"><b id="sendSession">—</b><span>Session</span></div><div class="stat"><b id="sendRate">—</b><span>Actual pace</span></div><div class="stat"><b id="sendFrames">—</b><span>Frames shown</span></div></div>
+      <p class="status" id="sendStatus" aria-live="polite">Choose a file to begin. A SHA-256 checksum is calculated before broadcasting.</p>
+    </section>
+    <section class="card" aria-labelledby="receiveTitle">
+      <div class="card-head"><div><h2 id="receiveTitle">Receive</h2><p class="sub">Point the camera at the sender’s QR code and keep it steady.</p></div><span class="step">2</span></div>
+      <div class="video-wrap"><video id="video" playsinline webkit-playsinline autoplay muted></video><div class="scan-overlay"></div><i id="scanDot" class="scan-dot off"></i><div id="scanPlaceholder" class="scan-placeholder">Camera is idle. Start scanning when the sender is broadcasting.</div></div>
+      <div class="controls"><button id="startScan" class="primary">Start camera scan</button><button id="pauseScan" class="quiet" disabled>Pause</button><button id="resetReceive" class="danger">Reset</button><button id="diagnose" class="quiet" type="button">Diagnose camera</button><a id="downloadLink" class="download" download>Download verified file</a></div>
+      <div id="camPick" class="cam-pick" hidden><label for="camSelect">Camera</label><select id="camSelect"></select></div>
+      <pre id="diagOut" class="diag-out" hidden aria-live="polite"></pre>
+      <div class="progress-label"><span id="receiveProgressLabel">Waiting for a QR frame</span><span id="receiveProgress">0%</span></div><div class="meter"><i id="receiveMeter"></i></div>
+      <div id="missing" class="missing">The sender continuously replays its frames, so missing frames are picked up on later passes.</div>
+      <div class="stats"><div class="stat"><b id="receiveSession">—</b><span>Session</span></div><div class="stat"><b id="receiveRate">—</b><span>Receive speed</span></div><div class="stat"><b id="receiveCounts">0 / —</b><span>Unique chunks</span></div></div>
+      <p class="status" id="receiveStatus" aria-live="polite">Start the camera, then scan the sender’s first QR code.</p>
+      <details><summary>Manual decoder test / fallback</summary><p>You can paste a decoded protocol frame here to exercise the same parsing, checksum, ordering and reconstruction logic.</p><textarea id="manualFrame" spellcheck="false" placeholder="OFT1,D,..." aria-label="Paste a decoded OFT1 frame"></textarea><div class="manual-row"><button id="importFrame" class="quiet">Import frame</button><span id="manualResult" aria-live="polite"></span></div></details>
+    </section>
+  </div>
+</main>
+<p class="foot">Protocol: <code>OFT1,type,session,sequence,total,CRC-32,payload</code>. Metadata and data frames are independently checksummed; duplicate frames are ignored; the sender repeats the complete stream so gaps recover automatically. Files are held in browser memory on both sides, so very large files (roughly hundreds of MB) may exhaust memory — keep transfers to a practical size. For best scanning: bright screen, no reflections, steady hands, and a lower pace if the receiver skips frames.</p>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const fileInput=$("fileInput"), fps=$("fps"), fpsOut=$("fpsOut"), startSend=$("startSend"), pauseSend=$("pauseSend"), cancelSend=$("cancelSend");
+const qrStage=$("qrStage"), sendStatus=$("sendStatus"), sendMeter=$("sendMeter"), sendProgress=$("sendProgress"), sendSession=$("sendSession"), sendRate=$("sendRate"), sendFrames=$("sendFrames");
+const video=$("video"), startScan=$("startScan"), pauseScan=$("pauseScan"), resetReceive=$("resetReceive"), scanPlaceholder=$("scanPlaceholder"), scanDot=$("scanDot"), receiveStatus=$("receiveStatus"), receiveMeter=$("receiveMeter"), receiveProgress=$("receiveProgress"), receiveSession=$("receiveSession"), receiveRate=$("receiveRate"), receiveCounts=$("receiveCounts"), missing=$("missing"), downloadLink=$("downloadLink");
+const manualFrame=$("manualFrame"), importFrame=$("importFrame"), manualResult=$("manualResult");
+const camPick=$("camPick"), camSelect=$("camSelect"), diagOut=$("diagOut"), diagnoseBtn=$("diagnose");
+
+const DATA_BYTES = 96;
+const META_CHARS = 120;
+const META_EVERY = 30;
+const PROTOCOL = "OFT1";
+const MAX_FILE_BYTES = 2147483647;
+const SCAN_MAX_DIM = 640;
+const SCAN_INTERVAL_MS = 16;
+
+function setStatus(el,text,kind=""){ el.textContent=text; el.className="status "+kind; }
+function fmtBytes(n){ if(!Number.isFinite(n)) return "—"; const u=["B","KB","MB","GB","TB"]; let i=0; while(n>=1024&&i<u.length-1){n/=1024;i++;} return `${n>=100||i===0?n.toFixed(0):n.toFixed(1)} ${u[i]}`; }
+function fmtRate(n){ return n?`${fmtBytes(n)}/s`:"—"; }
+function randomId(){ const b=new Uint8Array(5); crypto.getRandomValues(b); return Array.from(b,x=>x.toString(36).padStart(2,"0")).join("").slice(0,8).toUpperCase(); }
+function bytesToB64url(bytes){ let s=""; for(let i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function b64urlToBytes(s){ try{ const b=atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a; }catch{ return null; } }
+function crc32(bytes){ let c=-1; for(let i=0;i<bytes.length;i++){ c^=bytes[i]; for(let k=0;k<8;k++) c=(c>>>1)^((c&1)?0xEDB88320:0); } return ((c^-1)>>>0).toString(16).padStart(8,"0"); }
+function crcText(text){ return crc32(new TextEncoder().encode(text)); }
+async function sha256Hex(blob){ const d=await crypto.subtle.digest("SHA-256",await blob.arrayBuffer()); return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,"0")).join(""); }
+
+function parseFrame(raw){
+  const p = String(raw||"").trim().split(",");
+  if(p.length!==7) return null;
+  if(p[0]!==PROTOCOL) return null;
+  if(p[1]!=="M"&&p[1]!=="D") return null;
+  if(!/^[A-Z0-9]{5,12}$/.test(p[2])) return null;
+  if(!/^\d{1,7}$/.test(p[3])||!/^\d{1,7}$/.test(p[4])) return null;
+  if(!/^[0-9a-f]{8}$/i.test(p[5])) return null;
+  const seq=Number(p[3]), total=Number(p[4]);
+  if(!Number.isSafeInteger(seq)||!Number.isSafeInteger(total)||seq<0||seq>=total||total<1) return null;
+  return { kind:p[1], sid:p[2], seq, total, crc:p[5].toLowerCase(), payload:p[6] };
+}
+function makeFrame(kind,sid,seq,total,checksum,payload){ return `${PROTOCOL},${kind},${sid},${seq},${total},${checksum},${payload}`; }
+
+/* ================= QR ENCODER ================= */
+const QRMath = { EXP:new Array(256), LOG:new Array(256) };
+for(let i=0;i<8;i++) QRMath.EXP[i]=1<<i;
+for(let i=8;i<256;i++) QRMath.EXP[i]=QRMath.EXP[i-4]^QRMath.EXP[i-5]^QRMath.EXP[i-6]^QRMath.EXP[i-8];
+for(let i=0;i<255;i++) QRMath.LOG[QRMath.EXP[i]]=i;
+QRMath.gexp = n => QRMath.EXP[(n%255+255)%255];
+QRMath.glog = n => { if(n<1) throw new Error("QR log(0)"); return QRMath.LOG[n]; };
+
+class QRPoly{
+  constructor(num,shift){
+    let o=0;
+    while(o<num.length && num[o]===0) o++;
+    this.num=new Array(num.length-o+shift).fill(0);
+    for(let i=0;i<num.length-o;i++) this.num[i]=num[i+o];
+  }
+  get length(){ return this.num.length; }
+  get(i){ return this.num[i]; }
+  multiply(e){
+    const n=new Array(this.length+e.length-1).fill(0);
+    for(let i=0;i<this.length;i++)
+      for(let j=0;j<e.length;j++)
+        n[i+j]^=QRMath.gexp(QRMath.glog(this.get(i))+QRMath.glog(e.get(j)));
+    return new QRPoly(n,0);
+  }
+  mod(e){
+    if(this.length-e.length<0) return this;
+    const r=this.num.slice();
+    const ratio=QRMath.glog(r[0])-QRMath.glog(e.get(0));
+    for(let i=0;i<e.length;i++) r[i]^=QRMath.gexp(QRMath.glog(e.get(i))+ratio);
+    return new QRPoly(r,0).mod(e);
+  }
+}
+
+const PATTERN=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90]];
+const RSM=[null,[[1,26,16]],[[1,44,28]],[[1,70,44]],[[2,50,32]],[[2,67,43]],[[4,43,27]],[[4,49,31]],[[2,60,38],[2,61,39]],[[3,58,36],[2,59,37]],[[4,69,43],[1,70,44]],[[1,80,50],[4,81,51]],[[6,58,36],[2,59,37]],[[8,59,37],[1,60,38]],[[4,64,40],[5,65,41]],[[5,65,41],[5,66,42]],[[7,73,45],[3,74,46]],[[10,74,46],[1,75,47]],[[9,69,43],[4,70,44]],[[3,70,44],[11,71,45]],[[3,67,41],[13,68,42]]];
+
+const BCH15=0x0537, BCH18=0x1f25, BCHMASK=0x5412;
+function bchDigit(d){ let n=0; while(d!==0){ n++; d>>>=1; } return n; }
+function bchTypeInfo(d){ let x=d<<10; while(bchDigit(x)-bchDigit(BCH15)>=0) x^=BCH15<<(bchDigit(x)-bchDigit(BCH15)); return ((d<<10)|x)^BCHMASK; }
+function bchTypeNumber(d){ let x=d<<12; while(bchDigit(x)-bchDigit(BCH18)>=0) x^=BCH18<<(bchDigit(x)-bchDigit(BCH18)); return (d<<12)|x; }
+function maskFn(p,i,j){
+  switch(p){
+    case 0: return (i+j)%2===0;
+    case 1: return i%2===0;
+    case 2: return j%3===0;
+    case 3: return (i+j)%3===0;
+    case 4: return (Math.floor(i/2)+Math.floor(j/3))%2===0;
+    case 5: return (i*j)%2+(i*j)%3===0;
+    case 6: return ((i*j)%2+(i*j)%3)%2===0;
+    default: return ((i*j)%3+(i+j)%2)%2===0;
+  }
+}
+function lengthBits(v){ return v<10?8:16; }
+function errorPoly(n){ let a=new QRPoly([1],0); for(let i=0;i<n;i++) a=a.multiply(new QRPoly([1,QRMath.gexp(i)],0)); return a; }
+
+class BitBuffer{
+  constructor(){ this.buf=[]; this.len=0; }
+  get(i){ return ((this.buf[Math.floor(i/8)]>>>(7-i%8))&1)===1; }
+  put(num,len){ for(let i=0;i<len;i++) this.putBit(((num>>>(len-i-1))&1)===1); }
+  putBit(bit){
+    const k=Math.floor(this.len/8);
+    if(this.buf.length<=k) this.buf.push(0);
+    if(bit) this.buf[k]|=0x80>>>(this.len%8);
+    this.len++;
+  }
+}
+function rsBlocks(v){ const a=RSM[v]; if(!a) throw new Error("Frame is too large for the built-in QR encoder."); const out=[]; for(const [count,total,data] of a) for(let i=0;i<count;i++) out.push({total,data}); return out; }
+
+function createData(v,blocks,text){
+  const b=new BitBuffer(), bytes=[];
+  for(let i=0;i<text.length;i++){
+    const c=text.charCodeAt(i);
+    if(c>255) throw new Error("QR payload must be ASCII");
+    bytes.push(c);
+  }
+  b.put(4,4);
+  b.put(bytes.length,lengthBits(v));
+  bytes.forEach(x=>b.put(x,8));
+  const cap=blocks.reduce((s,x)=>s+x.data,0)*8;
+  if(b.len>cap) throw new Error("Frame capacity exceeded");
+  if(b.len+4<=cap) b.put(0,4);
+  while(b.len%8!==0) b.putBit(false);
+  let pad=0;
+  while(b.buf.length<cap/8) b.buf.push((pad++&1)?0x11:0xec);
+  return createBytes(b.buf,blocks);
+}
+function createBytes(buffer,blocks){
+  let offset=0, maxDc=0, maxEc=0;
+  const dc=[], ec=[];
+  for(let r=0;r<blocks.length;r++){
+    const n=blocks[r].data;
+    dc[r]=buffer.slice(offset,offset+n);
+    offset+=n;
+    maxDc=Math.max(maxDc,n);
+    const poly=errorPoly(blocks[r].total-n);
+    const rem=new QRPoly(dc[r],poly.length-1).mod(poly);
+    ec[r]=new Array(poly.length-1).fill(0);
+    for(let i=0;i<ec[r].length;i++){
+      const m=i+rem.length-ec[r].length;
+      if(m>=0) ec[r][i]=rem.get(m);
+    }
+    maxEc=Math.max(maxEc,ec[r].length);
+  }
+  const result=[];
+  for(let i=0;i<maxDc;i++) for(let r=0;r<blocks.length;r++) if(i<dc[r].length) result.push(dc[r][i]);
+  for(let i=0;i<maxEc;i++) for(let r=0;r<blocks.length;r++) if(i<ec[r].length) result.push(ec[r][i]);
+  return result;
+}
+function lostPoint(m){
+  const n=m.length; let lost=0;
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+    let same=0; const d=m[r][c];
+    for(let y=-1;y<=1;y++) for(let x=-1;x<=1;x++){
+      if(!y&&!x) continue;
+      const yy=r+y, xx=c+x;
+      if(yy>=0&&yy<n&&xx>=0&&xx<n&&m[yy][xx]===d) same++;
+    }
+    if(same>5) lost+=3+same-5;
+  }
+  for(let r=0;r<n-1;r++) for(let c=0;c<n-1;c++){
+    let s=0;
+    if(m[r][c]) s++; if(m[r+1][c]) s++; if(m[r][c+1]) s++; if(m[r+1][c+1]) s++;
+    if(s===0||s===4) lost+=3;
+  }
+  for(let r=0;r<n;r++) for(let c=0;c<n-6;c++)
+    if(m[r][c]&&!m[r][c+1]&&m[r][c+2]&&m[r][c+3]&&m[r][c+4]&&!m[r][c+5]&&m[r][c+6]) lost+=40;
+  for(let c=0;c<n;c++) for(let r=0;r<n-6;r++)
+    if(m[r][c]&&!m[r+1][c]&&m[r+2][c]&&m[r+3][c]&&m[r+4][c]&&!m[r+5][c]&&m[r+6][c]) lost+=40;
+  let dark=0;
+  for(const row of m) for(const x of row) if(x) dark++;
+  return lost+Math.abs(100*dark/n/n-50)/5*10;
+}
+
+class QRCode{
+  constructor(text){
+    this.text=text;
+    this.version=1;
+    for(;this.version<=20;this.version++){
+      const bl=rsBlocks(this.version);
+      const cap=bl.reduce((s,x)=>s+x.data,0)*8;
+      const need=4+lengthBits(this.version)+text.length*8;
+      if(need<=cap) break;
+    }
+    if(this.version>20) throw new Error("A protocol frame is unexpectedly too large.");
+    this.data=createData(this.version,rsBlocks(this.version),text);
+    let best=0, score=Infinity;
+    for(let p=0;p<8;p++){
+      const x=this.makeMatrix(p);
+      const s=lostPoint(x);
+      if(s<score){ score=s; best=p; }
+    }
+    this.matrix=this.makeMatrix(best);
+  }
+  finder(m,row,col){
+    for(let r=-1;r<=7;r++){
+      if(row+r<0||row+r>=m.length) continue;
+      for(let c=-1;c<=7;c++){
+        if(col+c<0||col+c>=m.length) continue;
+        m[row+r][col+c]=(
+          (r>=0&&r<=6&&(c===0||c===6)) ||
+          (c>=0&&c<=6&&(r===0||r===6)) ||
+          (r>=2&&r<=4&&c>=2&&c<=4)
+        );
+      }
+    }
+  }
+  makeMatrix(mask){
+    const n=this.version*4+17;
+    const m=Array.from({length:n},()=>Array(n).fill(null));
+    this.finder(m,0,0);
+    this.finder(m,n-7,0);
+    this.finder(m,0,n-7);
+    const pos=PATTERN[this.version-1];
+    for(let i=0;i<pos.length;i++) for(let j=0;j<pos.length;j++){
+      const row=pos[i], col=pos[j];
+      if(m[row][col]!==null) continue;
+      for(let r=-2;r<=2;r++) for(let c=-2;c<=2;c++)
+        m[row+r][col+c]=(r===-2||r===2||c===-2||c===2||(!r&&!c));
+    }
+    for(let i=8;i<n-8;i++){
+      if(m[i][6]===null) m[i][6]=i%2===0;
+      if(m[6][i]===null) m[6][i]=i%2===0;
+    }
+    const bits=bchTypeInfo(mask);
+    for(let i=0;i<15;i++){
+      const bit=((bits>>i)&1)===1;
+      m[i<6?i:(i<8?i+1:n-15+i)][8]=bit;
+      m[8][i<8?(n-i-1):(i<9?15-i:14-i)]=bit;
+    }
+    m[n-8][8]=true;
+    if(this.version>=7){
+      const vb=bchTypeNumber(this.version);
+      for(let i=0;i<18;i++){
+        const bit=((vb>>i)&1)===1;
+        m[Math.floor(i/3)][i%3+n-11]=bit;
+        m[i%3+n-11][Math.floor(i/3)]=bit;
+      }
+    }
+    let inc=-1, row=n-1, bitIndex=7, byteIndex=0;
+    for(let col=n-1;col>0;col-=2){
+      if(col===6) col--;
+      while(true){
+        for(let c=0;c<2;c++){
+          if(m[row][col-c]===null){
+            let dark=false;
+            if(byteIndex<this.data.length) dark=((this.data[byteIndex]>>>bitIndex)&1)===1;
+            if(maskFn(mask,row,col-c)) dark=!dark;
+            m[row][col-c]=dark;
+            bitIndex--;
+            if(bitIndex===-1){ byteIndex++; bitIndex=7; }
+          }
+        }
+        row+=inc;
+        if(row<0||row>=n){ row-=inc; inc=-inc; break; }
+      }
+    }
+    return m;
+  }
+}
+
+function qrCanvas(text){
+  const qr=new QRCode(text);
+  const modules=qr.matrix.length, quiet=4;
+  const px=Math.max(360,Math.min(1024,modules*12));
+  const canvas=document.createElement("canvas");
+  canvas.width=canvas.height=px;
+  const ctx=canvas.getContext("2d",{alpha:false});
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,px,px);
+  ctx.fillStyle="#000";
+  const scale=px/(modules+quiet*2);
+  const side=Math.ceil(scale)+0.5;
+  for(let r=0;r<modules;r++){
+    for(let c=0;c<modules;c++){
+      if(qr.matrix[r][c]) ctx.fillRect(Math.round((c+quiet)*scale),Math.round((r+quiet)*scale),side,side);
+    }
+  }
+  return canvas;
+}
+
+/* ================= QR DECODER ================= */
+const QRDecode = (function(){
+  const GF = QRMath;
+
+  function popcount(x){ let c=0; while(x){ c+=x&1; x>>>=1; } return c; }
+  function gfMul(a,b){ if(a===0||b===0) return 0; return GF.EXP[(GF.LOG[a]+GF.LOG[b])%255]; }
+  function gfDiv(a,b){ if(b===0) throw new Error("gfDiv by zero"); if(a===0) return 0; return GF.EXP[(GF.LOG[a]-GF.LOG[b]+255)%255]; }
+
+  function otsu(gray){
+    const hist=new Int32Array(256);
+    for(let i=0;i<gray.length;i++) hist[gray[i]]++;
+    const total=gray.length;
+    let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i];
+    let sumB=0,wB=0,max=0,threshold=127;
+    for(let i=0;i<256;i++){
+      wB+=hist[i]; if(wB===0) continue;
+      const wF=total-wB; if(wF===0) break;
+      sumB+=i*hist[i];
+      const mB=sumB/wB, mF=(sum-sumB)/wF;
+      const between=wB*wF*(mB-mF)*(mB-mF);
+      if(between>max){ max=between; threshold=i; }
+    }
+    return threshold;
+  }
+  function grayscale(imageData){
+    const {data,width,height}=imageData;
+    const gray=new Uint8Array(width*height);
+    for(let i=0;i<width*height;i++){
+      gray[i]=((data[i*4]*77 + data[i*4+1]*150 + data[i*4+2]*29) >> 8);
+    }
+    return gray;
+  }
+  function binarize(gray, threshold){
+    const bin=new Uint8Array(gray.length);
+    for(let i=0;i<gray.length;i++) bin[i]=gray[i]<threshold?1:0;
+    return bin;
+  }
+  function readRatio(bin,w,h,x0,y0,dx,dy){
+    const counts=[0,0,0,0,0];
+    let x=x0, y=y0, state=0, color=1;
+    while(state<5 && x>=0 && x<w && y>=0 && y<h){
+      if(bin[y*w+x]===color){ counts[state]++; }
+      else { if(state===4) break; state++; color=1-color; counts[state]++; }
+      x+=dx; y+=dy;
+    }
+    if(state!==4) return null;
+    const total=counts[0]+counts[1]+counts[2]+counts[3]+counts[4];
+    if(total<7) return null;
+    const unit=total/7;
+    if(counts[0]<0.5*unit||counts[0]>1.5*unit) return null;
+    if(counts[1]<0.5*unit||counts[1]>1.5*unit) return null;
+    if(counts[2]<2*unit||counts[2]>4*unit) return null;
+    if(counts[3]<0.5*unit||counts[3]>1.5*unit) return null;
+    if(counts[4]<0.5*unit||counts[4]>1.5*unit) return null;
+    const cx=x0+(counts[0]+counts[1]+counts[2]/2)*dx;
+    const cy=y0+(counts[0]+counts[1]+counts[2]/2)*dy;
+    return {cx,cy,size:unit,endX:x,endY:y};
+  }
+  function findPatterns(bin,w,h){
+    const found=[];
+    for(let y=0;y<h;y++){
+      let prev=0;
+      for(let x=0;x<w;x++){
+        const cur=bin[y*w+x];
+        if(cur===1 && prev===0){
+          const r=readRatio(bin,w,h,x,y,1,0);
+          if(r){
+            const rv=readRatio(bin,w,h,r.cx|0,r.cy|0,0,1);
+            if(rv){
+              const size=(r.size+rv.size)/2;
+              found.push({x:(r.cx+rv.cx)/2, y:(r.cy+rv.cy)/2, size});
+              x=r.endX|0;
+              continue;
+            }
+          }
+        }
+        prev=cur;
+      }
+    }
+    return found;
+  }
+  function mergePatterns(patterns){
+    const out=[];
+    for(const p of patterns){
+      let merged=false;
+      for(const q of out){
+        const d=Math.hypot(p.x-q.x,p.y-q.y);
+        if(d < p.size*3){
+          const n=q.count+1;
+          q.x=(q.x*q.count+p.x)/n;
+          q.y=(q.y*q.count+p.y)/n;
+          q.size=(q.size*q.count+p.size)/n;
+          q.count=n;
+          merged=true; break;
+        }
+      }
+      if(!merged) out.push({x:p.x,y:p.y,size:p.size,count:1});
+    }
+    return out;
+  }
+  function triangleScore(a,b,c){
+    const ab=Math.hypot(a.x-b.x,a.y-b.y);
+    const bc=Math.hypot(b.x-c.x,b.y-c.y);
+    const ca=Math.hypot(c.x-a.x,c.y-a.y);
+    const sides=[ab,bc,ca].sort((x,y)=>x-y);
+    const s=sides[0], s2=sides[1], s3=sides[2];
+    const expected=s*Math.SQRT2;
+    const err=Math.abs(s3-expected)/expected + Math.abs(s2-s)/s;
+    const avg=(a.size+b.size+c.size)/3;
+    const sizeErr=(Math.abs(a.size-avg)+Math.abs(b.size-avg)+Math.abs(c.size-avg))/avg;
+    return err + sizeErr*0.5;
+  }
+  function findCorners(patterns){
+    const merged=mergePatterns(patterns);
+    if(merged.length<3) return null;
+    merged.sort((a,b)=>b.count-a.count);
+    const cands=merged.slice(0,Math.min(15,merged.length));
+    let best=null, bestScore=Infinity;
+    for(let i=0;i<cands.length;i++)
+      for(let j=i+1;j<cands.length;j++)
+        for(let k=j+1;k<cands.length;k++){
+          const s=triangleScore(cands[i],cands[j],cands[k]);
+          if(s<bestScore){ bestScore=s; best=[cands[i],cands[j],cands[k]]; }
+        }
+    if(!best||bestScore>0.5) return null;
+    const [a,b,c]=best;
+    const ab=Math.hypot(a.x-b.x,a.y-b.y);
+    const bc=Math.hypot(b.x-c.x,b.y-c.y);
+    const ca=Math.hypot(c.x-a.x,c.y-a.y);
+    let tl,p2,p3;
+    if(ab>bc && ab>ca){ tl=c; p2=a; p3=b; }
+    else if(bc>ab && bc>ca){ tl=a; p2=b; p3=c; }
+    else { tl=b; p2=a; p3=c; }
+    const cross=(p2.x-tl.x)*(p3.y-tl.y)-(p2.y-tl.y)*(p3.x-tl.x);
+    let tr, bl;
+    if(cross>0){ tr=p2; bl=p3; } else { tr=p3; bl=p2; }
+    return {tl,tr,bl};
+  }
+  function estimateVersion(tl,tr,bl){
+    const moduleSize=(tl.size+tr.size+bl.size)/3;
+    const dTR=Math.hypot(tr.x-tl.x,tr.y-tl.y);
+    const dBL=Math.hypot(bl.x-tl.x,bl.y-tl.y);
+    const nTR=dTR/moduleSize+7;
+    const nBL=dBL/moduleSize+7;
+    const n=(nTR+nBL)/2;
+    let v=Math.round((n-17)/4);
+    if(v<1) v=1; if(v>20) v=20;
+    return v;
+  }
+  function sampleGrid(bin,w,h,corners,version){
+    const n=version*4+17;
+    const {tl,tr,bl}=corners;
+    const dxTR=(tr.x-tl.x)/(n-7);
+    const dyTR=(tr.y-tl.y)/(n-7);
+    const dxBL=(bl.x-tl.x)/(n-7);
+    const dyBL=(bl.y-tl.y)/(n-7);
+    const matrix=Array.from({length:n},()=>new Uint8Array(n));
+    for(let r=0;r<n;r++){
+      for(let c=0;c<n;c++){
+        const u=c+0.5-3.5;
+        const v=r+0.5-3.5;
+        const px=tl.x + dxTR*u + dxBL*v;
+        const py=tl.y + dyTR*u + dyBL*v;
+        const xi=Math.round(px);
+        const yi=Math.round(py);
+        let dark=0, total=0;
+        for(let oy=-1;oy<=1;oy++){
+          for(let ox=-1;ox<=1;ox++){
+            const xx=xi+ox, yy=yi+oy;
+            if(xx>=0&&xx<w&&yy>=0&&yy<h){ dark+=bin[yy*w+xx]; total++; }
+          }
+        }
+        matrix[r][c]=total>0 && dark*2>=total ? 1 : 0;
+      }
+    }
+    return matrix;
+  }
+  function buildFunctionMatrix(version){
+    const n=version*4+17;
+    const fn=Array.from({length:n},()=>new Uint8Array(n));
+    for(let r=0;r<8;r++) for(let c=0;c<8;c++){ fn[r][c]=1; fn[r][n-1-c]=1; fn[n-1-r][c]=1; }
+    for(let i=8;i<n-8;i++){ fn[6][i]=1; fn[i][6]=1; }
+    const pos=PATTERN[version-1];
+    if(pos.length){
+      const first=pos[0], last=pos[pos.length-1];
+      for(const r of pos) for(const c of pos){
+        if((r===first&&c===first)||(r===first&&c===last)||(r===last&&c===first)) continue;
+        for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++) fn[r+dr][c+dc]=1;
+      }
+    }
+    for(let r=0;r<=5;r++) fn[r][8]=1;
+    fn[7][8]=1; fn[8][8]=1;
+    for(let r=n-7;r<n;r++) fn[r][8]=1;
+    for(let c=0;c<=5;c++) fn[8][c]=1;
+    fn[8][7]=1;
+    for(let c=n-8;c<n;c++) fn[8][c]=1;
+    fn[n-8][8]=1;
+    if(version>=7){
+      for(let i=0;i<6;i++) for(let j=0;j<3;j++){
+        fn[i][n-11+j]=1;
+        fn[n-11+j][i]=1;
+      }
+    }
+    return fn;
+  }
+  const FORMAT_CODES=[];
+  for(let d=0;d<32;d++) FORMAT_CODES.push(bchTypeInfo(d));
+  function decodeFormat(bits){
+    let best=-1,bestDist=4;
+    for(let d=0;d<32;d++){
+      const dist=popcount(bits ^ FORMAT_CODES[d]);
+      if(dist<bestDist){ bestDist=dist; best=d; }
+    }
+    if(best<0) return null;
+    return { ecLevel:(best>>3)&3, mask:best&7 };
+  }
+  function readFormatInfo(matrix,n){
+    let b1=0,b2=0;
+    for(let i=0;i<15;i++){
+      const r=i<6?i:(i<8?i+1:n-15+i);
+      if(matrix[r][8]) b1|=(1<<i);
+      const c=i<8?(n-1-i):(i<9?15-i:14-i);
+      if(matrix[8][c]) b2|=(1<<i);
+    }
+    return decodeFormat(b1)||decodeFormat(b2);
+  }
+  function readCodewords(matrix,fn,n,capacityBytes){
+    const bits=[];
+    const target=capacityBytes*8;
+    let inc=-1,row=n-1;
+    outer: for(let col=n-1;col>0;col-=2){
+      if(col===6) col--;
+      while(true){
+        for(let c=0;c<2;c++){
+          const cc=col-c;
+          if(!fn[row][cc]){
+            bits.push(matrix[row][cc]?1:0);
+            if(bits.length===target) break outer;
+          }
+        }
+        row+=inc;
+        if(row<0||row>=n){ row-=inc; inc=-inc; break; }
+      }
+    }
+    const bytes=[];
+    for(let i=0;i+8<=bits.length;i+=8){
+      let b=0;
+      for(let j=0;j<8;j++) b=(b<<1)|bits[i+j];
+      bytes.push(b);
+    }
+    return bytes;
+  }
+  function rsDecode(block,ecLen){
+    const n=block.length;
+    const syn=new Array(ecLen);
+    let allZero=true;
+    for(let i=0;i<ecLen;i++){
+      let s=0;
+      for(let j=0;j<n;j++){
+        const c=block[n-1-j];
+        if(c!==0) s^=GF.EXP[(GF.LOG[c]+i*j)%255];
+      }
+      syn[i]=s;
+      if(s!==0) allZero=false;
+    }
+    if(allZero) return block.slice(0,n-ecLen);
+
+    let C=[1],B=[1],L=0,m=1,b=1;
+    for(let i=0;i<ecLen;i++){
+      let d=syn[i];
+      for(let j=1;j<=L;j++){
+        if(j<C.length && C[j]!==0 && syn[i-j]!==0){
+          d^=GF.EXP[(GF.LOG[C[j]]+GF.LOG[syn[i-j]])%255];
+        }
+      }
+      if(d===0){ m++; continue; }
+      const T=C.slice();
+      const scale=gfDiv(d,b);
+      const newC=C.slice();
+      while(newC.length<B.length+m) newC.push(0);
+      for(let j=0;j<B.length;j++){
+        if(B[j]!==0) newC[j+m]^=gfMul(B[j],scale);
+      }
+      if(2*L<=i){ L=i+1-L; B=T; b=d; m=1; } else { m++; }
+      C=newC;
+    }
+    while(C.length>1 && C[C.length-1]===0) C.pop();
+    if(C.length-1!==L) return null;
+
+    const errPos=[];
+    for(let p=0;p<n;p++){
+      const alphaInv=p===0?1:GF.EXP[255-p];
+      let val=0;
+      for(let j=C.length-1;j>=0;j--) val=gfMul(val,alphaInv)^C[j];
+      if(val===0) errPos.push(p);
+    }
+    if(errPos.length!==L) return null;
+
+    const omega=new Array(ecLen).fill(0);
+    for(let i=0;i<ecLen;i++){
+      if(syn[i]===0) continue;
+      for(let j=0;j<C.length && i+j<ecLen;j++){
+        if(C[j]===0) continue;
+        omega[i+j]^=GF.EXP[(GF.LOG[syn[i]]+GF.LOG[C[j]])%255];
+      }
+    }
+
+    const corrected=block.slice();
+    for(const p of errPos){
+      const Xp=p===0?1:GF.EXP[p];
+      const XpInv=p===0?1:GF.EXP[255-p];
+      let num=0;
+      for(let j=omega.length-1;j>=0;j--) num=gfMul(num,XpInv)^omega[j];
+      let den=0;
+      for(let j=1;j<C.length;j+=2){
+        if(C[j]===0) continue;
+        const exp=(GF.LOG[C[j]]+((255-p)*(j-1))%255)%255;
+        den^=GF.EXP[exp];
+      }
+      if(den===0) return null;
+      const errVal=gfDiv(gfMul(Xp,num),den);
+      corrected[n-1-p]^=errVal;
+    }
+    for(let i=0;i<ecLen;i++){
+      let s=0;
+      for(let j=0;j<n;j++){
+        const c=corrected[n-1-j];
+        if(c!==0) s^=GF.EXP[(GF.LOG[c]+i*j)%255];
+      }
+      if(s!==0) return null;
+    }
+    return corrected.slice(0,n-ecLen);
+  }
+  function deinterleave(rawBytes,blocks){
+    const expanded=[];
+    for(const [count,total,data] of blocks){
+      for(let i=0;i<count;i++) expanded.push({total,data,ec:total-data});
+    }
+    const nBlocks=expanded.length;
+    const maxData=Math.max(...expanded.map(b=>b.data));
+    const maxEc=Math.max(...expanded.map(b=>b.ec));
+    let idx=0;
+    const dataBlocks=expanded.map(()=>[]);
+    for(let round=0;round<maxData;round++){
+      for(let b=0;b<nBlocks;b++){
+        if(round<expanded[b].data) dataBlocks[b].push(rawBytes[idx++]);
+      }
+    }
+    const ecBlocks=expanded.map(()=>[]);
+    for(let round=0;round<maxEc;round++){
+      for(let b=0;b<nBlocks;b++){
+        if(round<expanded[b].ec) ecBlocks[b].push(rawBytes[idx++]);
+      }
+    }
+    return expanded.map((b,i)=>[...dataBlocks[i],...ecBlocks[i]]);
+  }
+  function parseByteMode(dataBytes,version){
+    const bits=[];
+    for(const b of dataBytes){
+      for(let i=7;i>=0;i--) bits.push((b>>i)&1);
+    }
+    let idx=0;
+    function readBits(n){
+      if(idx+n>bits.length) return -1;
+      let v=0;
+      for(let i=0;i<n;i++) v=(v<<1)|bits[idx++];
+      return v;
+    }
+    let out="";
+    while(idx+4<=bits.length){
+      const mode=readBits(4);
+      if(mode===0||mode<0) break;
+      if(mode===4){
+        const len=readBits(version<10?8:16);
+        if(len<0) return null;
+        let s="";
+        for(let i=0;i<len;i++){
+          const b=readBits(8);
+          if(b<0) return null;
+          s+=String.fromCharCode(b);
+        }
+        out+=s;
+      } else { return null; }
+    }
+    return out;
+  }
+  function decodeMatrix(matrix,version){
+    const n=version*4+17;
+    const fmt=readFormatInfo(matrix,n);
+    if(!fmt) return null;
+    if(fmt.ecLevel!==0) return null;
+    const unmasked=Array.from({length:n},()=>new Uint8Array(n));
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) unmasked[r][c]=matrix[r][c]^(maskFn(fmt.mask,r,c)?1:0);
+    const fn=buildFunctionMatrix(version);
+    const blocks=RSM[version];
+    const totalCw=blocks.reduce((s,[c,t,d])=>s+c*t,0);
+    const raw=readCodewords(unmasked,fn,n,totalCw);
+    if(raw.length<totalCw) return null;
+    const deint=deinterleave(raw.slice(0,totalCw),blocks);
+    const expanded=[];
+    for(const [count,total,data] of blocks){
+      for(let k=0;k<count;k++) expanded.push({total,data,ec:total-data});
+    }
+    const dataAll=[];
+    for(let i=0;i<deint.length;i++){
+      const ecLenB=expanded[i].ec;
+      const decoded=rsDecode(deint[i],ecLenB);
+      if(!decoded) return null;
+      for(const b of decoded) dataAll.push(b);
+    }
+    return parseByteMode(dataAll,version);
+  }
+  function decode(imageData){
+    let gray;
+    try{ gray=grayscale(imageData); }catch{ return null; }
+    const thresholds=[];
+    const otsuT=otsu(gray);
+    thresholds.push(otsuT);
+    for(const t of [64,96,128,160,192]) if(Math.abs(t-otsuT)>10) thresholds.push(t);
+    for(const t of thresholds){
+      const bin=binarize(gray,t);
+      const patterns=findPatterns(bin,imageData.width,imageData.height);
+      if(patterns.length<3) continue;
+      const corners=findCorners(patterns);
+      if(!corners) continue;
+      const version=estimateVersion(corners.tl,corners.tr,corners.bl);
+      const matrix=sampleGrid(bin,imageData.width,imageData.height,corners,version);
+      const text=decodeMatrix(matrix,version);
+      if(text) return text;
+    }
+    return null;
+  }
+  return { decode };
+})();
+
+/* ================= SENDER ================= */
+let sender=null;
+const EMPTY_QR="<div class=\"empty-qr\">Select a file to prepare the first QR frame.</div>";
+
+fileInput.addEventListener("change",async()=>{
+  const f=fileInput.files[0];
+  cancelBroadcast(false);
+  if(!f){ $("fileName").textContent="No file selected."; qrStage.innerHTML=EMPTY_QR; return; }
+  if(f.size>MAX_FILE_BYTES){
+    $("fileName").textContent=`${f.name} is too large for this browser build (limit ${fmtBytes(MAX_FILE_BYTES)}).`;
+    setStatus(sendStatus,"Choose a smaller file: the receiver must assemble it in browser memory.","error");
+    return;
+  }
+  $("fileName").textContent=`${f.name} — ${fmtBytes(f.size)} — ${f.type||"unknown type"}`;
+  startSend.disabled=true;
+  setStatus(sendStatus,"Preparing file metadata and SHA-256 checksum…","");
+  try{
+    const hash=await sha256Hex(f);
+    const sid=randomId();
+    const total=Math.max(1,Math.ceil(f.size/DATA_BYTES));
+    const manifest={v:1,s:sid,n:f.name,t:f.type||"application/octet-stream",z:f.size,c:total,b:DATA_BYTES,h:hash,at:Date.now()};
+    const packed=bytesToB64url(new TextEncoder().encode(JSON.stringify(manifest)));
+    const fragments=[];
+    for(let i=0;i<packed.length;i+=META_CHARS) fragments.push(packed.slice(i,i+META_CHARS));
+    sender={
+      file:f, sid, total, manifest, fragments,
+      next:0, shown:0, pass:0, playing:false, timer:0, target:+fps.value,
+      renderEMA:0, firstBurst:true, metaLeft:0, dataSinceMeta:0, metaCache:[]
+    };
+    startSend.disabled=false;
+    sendSession.textContent=sid;
+    qrStage.innerHTML=EMPTY_QR;
+    setStatus(sendStatus,`Ready: ${total.toLocaleString()} data frame${total===1?"":"s"} and ${fragments.length} metadata frame${fragments.length===1?"":"s"}.`,"ok");
+  }catch(e){
+    setStatus(sendStatus,`Could not prepare this file: ${e.message}`,"error");
+  }
+});
+
+fps.addEventListener("input",()=>{ fpsOut.textContent=`${fps.value} FPS`; if(sender) sender.target=+fps.value; });
+
+function senderMetaFrame(i){ const x=sender.fragments[i]; return makeFrame("M",sender.sid,i,sender.fragments.length,crcText(x),x); }
+function metaCanvasFor(i){
+  if(!sender) return null;
+  if(!sender.metaCache[i]) sender.metaCache[i]=qrCanvas(senderMetaFrame(i));
+  return sender.metaCache[i];
+}
+async function senderDataFrame(i){
+  const start=i*DATA_BYTES;
+  const bytes=new Uint8Array(await sender.file.slice(start,Math.min(sender.file.size,start+DATA_BYTES)).arrayBuffer());
+  return makeFrame("D",sender.sid,i,sender.total,crc32(bytes),bytesToB64url(bytes));
+}
+function updateSendUI(){
+  if(!sender) return;
+  const p=(sender.next/sender.total)*100;
+  sendMeter.style.width=`${p}%`;
+  sendProgress.textContent=`pass ${sender.pass+1} · ${Math.floor(p)}%`;
+  sendFrames.textContent=sender.shown.toLocaleString();
+  const fpsNow=sender.renderEMA?1000/Math.max(1,sender.renderEMA):0;
+  sendRate.textContent=fpsNow?`${Math.min(fpsNow,sender.target).toFixed(1)} FPS`:"—";
+}
+async function broadcastTick(){
+  if(!sender||!sender.playing) return;
+  const begun=performance.now();
+  try{
+    let canvas;
+    if(sender.firstBurst){
+      canvas=metaCanvasFor(sender.shown);
+      if(sender.shown>=sender.fragments.length-1) sender.firstBurst=false;
+    }else if(sender.metaLeft>0){
+      canvas=metaCanvasFor(sender.fragments.length-sender.metaLeft);
+      sender.metaLeft--;
+    }else{
+      canvas=qrCanvas(await senderDataFrame(sender.next));
+      sender.next++;
+      if(sender.next>=sender.total){ sender.next=0; sender.pass++; }
+      sender.dataSinceMeta++;
+      if(sender.dataSinceMeta>=META_EVERY){ sender.dataSinceMeta=0; sender.metaLeft=sender.fragments.length; }
+    }
+    qrStage.replaceChildren(canvas);
+    sender.shown++;
+    const cost=performance.now()-begun;
+    sender.renderEMA=sender.renderEMA?sender.renderEMA*0.85+cost*0.15:cost;
+    updateSendUI();
+    const capable=Math.max(5,Math.min(sender.target,1000/(sender.renderEMA+3)));
+    sender.timer=setTimeout(broadcastTick,Math.max(0,1000/capable-cost));
+  }catch(e){
+    setStatus(sendStatus,`Broadcast stopped: ${e.message}`,"error");
+    cancelBroadcast(false);
+  }
+}
+function startBroadcast(){
+  if(!sender) return;
+  sender.playing=true;
+  startSend.disabled=true;
+  pauseSend.disabled=false;
+  cancelSend.disabled=false;
+  pauseSend.textContent="Pause";
+  setStatus(sendStatus,"Broadcasting. The QR stream repeats forever, so a late receiver can still catch every frame.","ok");
+  broadcastTick();
+}
+function cancelBroadcast(show=true){
+  const had=!!sender;
+  if(sender&&sender.timer) clearTimeout(sender.timer);
+  sender=null;
+  startSend.disabled=!fileInput.files[0];
+  pauseSend.disabled=true;
+  cancelSend.disabled=true;
+  pauseSend.textContent="Pause";
+  sendMeter.style.width="0%";
+  sendProgress.textContent="—";
+  sendRate.textContent="—";
+  sendFrames.textContent="—";
+  if(show&&had){ qrStage.innerHTML=EMPTY_QR; setStatus(sendStatus,"Broadcast cancelled. Choose the file again to prepare a new session.","warn"); }
+}
+startSend.addEventListener("click",startBroadcast);
+pauseSend.addEventListener("click",()=>{
+  if(!sender) return;
+  sender.playing=!sender.playing;
+  if(sender.playing){
+    pauseSend.textContent="Pause";
+    setStatus(sendStatus,"Broadcasting.","ok");
+    broadcastTick();
+  }else{
+    clearTimeout(sender.timer);
+    pauseSend.textContent="Resume";
+    setStatus(sendStatus,"Broadcast paused. The current QR frame stays on screen.","warn");
+  }
+});
+cancelSend.addEventListener("click",()=>cancelBroadcast());
+
+/* ================= RECEIVER ================= */
+let receiver=null, detector=null, stream=null, scanTimer=0, objectUrl=null;
+let scanCanvas=null, scanCtx=null, wakeLock=null;
+
+function newReceiver(){
+  return {
+    sid:null, manifest:null, meta:new Map(), metaTotal:null,
+    chunks:new Map(), total:null, duplicates:0, bad:0,
+    paused:false, scanning:false, history:[], complete:false
+  };
+}
+
+async function acquireWakeLock(){
+  try{
+    if("wakeLock" in navigator && !wakeLock){
+      wakeLock=await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release",()=>{ wakeLock=null; });
+    }
+  }catch(_){}
+}
+function releaseWakeLock(){
+  try{ if(wakeLock) wakeLock.release(); }catch(_){}
+  wakeLock=null;
+}
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible" && receiver && receiver.scanning && !receiver.paused){
+    acquireWakeLock();
+  }
+});
+
+function stopCamera(){
+  clearTimeout(scanTimer); scanTimer=0;
+  if(stream){ stream.getTracks().forEach(t=>{ try{t.stop();}catch(_){} }); stream=null; }
+  video.srcObject=null;
+  scanDot.classList.add("off");
+  releaseWakeLock();
+}
+function receiverUI(){
+  const r=receiver;
+  if(!r) return;
+  receiveSession.textContent=r.sid||"—";
+  const total=(r.manifest&&r.manifest.c)||r.total;
+  receiveCounts.textContent=`${r.chunks.size.toLocaleString()} / ${total?total.toLocaleString():"—"}`;
+  const percent=total?Math.min(100,r.chunks.size/total*100):0;
+  receiveMeter.style.width=`${percent}%`;
+  receiveProgress.textContent=total?`${percent.toFixed(percent<10?1:0)}%`:"0%";
+  const now=performance.now();
+  r.history=r.history.filter(x=>now-x.t<5000);
+  const amount=r.history.reduce((s,x)=>s+x.n,0);
+  const span=r.history.length?Math.max(1,now-r.history[0].t):0;
+  receiveRate.textContent=span?fmtRate(amount/(span/1000)):"—";
+  if(total){
+    const holes=[];
+    let start=-1;
+    for(let i=0;i<total&&holes.length<6;i++){
+      if(!r.chunks.has(i)&&start<0) start=i;
+      if((r.chunks.has(i)||i===total-1)&&start>=0){
+        holes.push(`${start}${i-1>start?`–${i-1}`:""}`);
+        start=-1;
+      }
+    }
+    const left=total-r.chunks.size;
+    missing.textContent=left
+      ? `${left.toLocaleString()} chunk${left===1?"":"s"} still missing — keep the camera on the sender, they repeat on the next pass. First missing: ${holes.join(", ")||"…"}.`
+      : "All data frames received.";
+  }
+}
+function maybeComplete(){
+  const r=receiver;
+  if(!r||!r.manifest||r.complete) return;
+  if(r.chunks.size===r.manifest.c){
+    r.complete=true;
+    setStatus(receiveStatus,"All frames received. Verifying the final SHA-256 checksum…","ok");
+    assembleFile();
+  }
+}
+function acceptFrame(raw){
+  const f=parseFrame(raw);
+  if(!f) return false;
+  if(!receiver) receiver=newReceiver();
+  const r=receiver;
+  if(r.sid&&r.sid!==f.sid){
+    setStatus(receiveStatus,`Ignoring another session (${f.sid}). Press Reset to switch sessions.`,"warn");
+    return false;
+  }
+  if(!r.sid){
+    r.sid=f.sid;
+    setStatus(receiveStatus,"Session discovered. Collecting metadata and file chunks…","ok");
+  }
+  if(f.kind==="M"){
+    if(crcText(f.payload)!==f.crc){ r.bad++; return false; }
+    if(r.metaTotal!==null&&r.metaTotal!==f.total){ r.bad++; return false; }
+    r.metaTotal=f.total;
+    if(!r.meta.has(f.seq)) r.meta.set(f.seq,f.payload);
+    if(r.meta.size===f.total&&!r.manifest){
+      try{
+        let packed="";
+        for(let i=0;i<f.total;i++) packed+=r.meta.get(i)||"";
+        const bytes=b64urlToBytes(packed);
+        if(!bytes) throw new Error("bad base64");
+        const m=JSON.parse(new TextDecoder().decode(bytes));
+        if(m.v!==1||m.s!==r.sid||!Number.isSafeInteger(m.c)||!Number.isSafeInteger(m.z)||m.c<1||m.z<0||typeof m.n!=="string"||!/^[a-f0-9]{64}$/.test(m.h)) throw new Error("invalid metadata");
+        if(r.total!==null&&r.total!==m.c) throw new Error("frame count mismatch");
+        r.manifest=m;
+        r.total=m.c;
+        setStatus(receiveStatus,`Metadata received: ${m.n} (${fmtBytes(m.z)}). Keep scanning for all data frames.`,"ok");
+      }catch(e){
+        r.bad++;
+        r.meta.clear();
+        r.metaTotal=null;
+        setStatus(receiveStatus,"Metadata was invalid or from another file; waiting for the next metadata pass.","warn");
+      }
+    }
+  }else{
+    const bytes=b64urlToBytes(f.payload);
+    if(!bytes||crc32(bytes)!==f.crc){ r.bad++; return false; }
+    if(r.total!==null&&r.total!==f.total){ r.bad++; return false; }
+    r.total=f.total;
+    if(r.chunks.has(f.seq)){ r.duplicates++; }
+    else{
+      r.chunks.set(f.seq,bytes);
+      r.history.push({t:performance.now(),n:bytes.length});
+    }
+  }
+  receiverUI();
+  maybeComplete();
+  return true;
+}
+
+async function scanLoop(){
+  if(!receiver||!receiver.scanning||receiver.paused) return;
+  try{
+    if(video.readyState>=2 && video.videoWidth>0){
+      let text=null;
+      if(detector){
+        try{
+          const found=await detector.detect(video);
+          if(found&&found.length) text=found[0].rawValue;
+        }catch(_){}
+      }
+      if(!text){
+        const vw=video.videoWidth, vh=video.videoHeight;
+        let sw=vw, sh=vh;
+        if(sw>SCAN_MAX_DIM||sh>SCAN_MAX_DIM){
+          const s=SCAN_MAX_DIM/Math.max(sw,sh);
+          sw=Math.max(1,Math.round(sw*s));
+          sh=Math.max(1,Math.round(sh*s));
+        }
+        if(!scanCanvas){ scanCanvas=document.createElement("canvas"); }
+        if(scanCanvas.width!==sw||scanCanvas.height!==sh){
+          scanCanvas.width=sw; scanCanvas.height=sh;
+          scanCtx=scanCanvas.getContext("2d",{willReadFrequently:true});
+        }
+        scanCtx.drawImage(video,0,0,sw,sh);
+        const imageData=scanCtx.getImageData(0,0,sw,sh);
+        text=QRDecode.decode(imageData);
+      }
+      if(text) acceptFrame(text);
+    }
+  }catch(e){ console.error(e); }
+  if(receiver&&receiver.scanning&&!receiver.paused){
+    scanTimer=setTimeout(scanLoop,SCAN_INTERVAL_MS);
+  }
+}
+
+async function diagnose(){
+  const L=[];
+  L.push(`userAgent       : ${navigator.userAgent}`);
+  L.push(`protocol        : ${location.protocol}`);
+  L.push(`isSecureContext : ${window.isSecureContext}`);
+  L.push(`mediaDevices    : ${!!navigator.mediaDevices}`);
+  L.push(`getUserMedia    : ${!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)}`);
+  L.push(`BarcodeDetector : ${"BarcodeDetector" in window} (built-in decoder always available as fallback)`);
+  L.push(`wakeLock        : ${"wakeLock" in navigator}`);
+  if(navigator.permissions&&navigator.permissions.query){
+    try{ L.push(`camera perm     : ${(await navigator.permissions.query({name:"camera"})).state}`); }
+    catch{ L.push(`camera perm     : (query unsupported)`); }
+  }
+  if(navigator.mediaDevices&&navigator.mediaDevices.enumerateDevices){
+    try{
+      const cams=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+      L.push(`video devices   : ${cams.length}`);
+      cams.forEach((c,i)=>L.push(`  [${i}] ${c.label||"(label hidden — no permission yet)"}`));
+    }catch(e){ L.push(`enumerateDevices: ${e.name}: ${e.message}`); }
+  }
+  L.push("");
+  L.push(window.isSecureContext?"✓ secure context OK":"✗ NOT secure — camera will be blocked. Use HTTPS or localhost.");
+  L.push("✓ built-in QR decoder available on every browser");
+  diagOut.hidden=false;
+  diagOut.textContent=L.join("\n");
+}
+
+function describeCamError(e){
+  switch(e.name){
+    case "NotAllowedError": case "PermissionDeniedError":
+      return "Camera permission was denied. On iOS: Settings → Safari → Camera → Allow. On Android: chrome://settings → Site settings → Camera. Then reload.";
+    case "NotFoundError": case "DevicesNotFoundError":
+      return "No camera was found on this device.";
+    case "NotReadableError": case "TrackStartError":
+      return "The camera is already in use by another app or tab. Close it and try again.";
+    case "OverconstrainedError":
+      return "No camera matched the requested settings — try picking a different camera below.";
+    case "SecurityError":
+      return "The browser blocked camera access for this origin. Serve the page over HTTPS or http://localhost.";
+    case "AbortError":
+      return "The camera could not be started (hardware or driver error).";
+    default:
+      return `${e.name||"Error"}: ${e.message||"camera could not be started"}`;
+  }
+}
+
+async function getCameraStream(deviceId){
+  const base=deviceId?{deviceId:{exact:deviceId}}:{facingMode:{ideal:"environment"}};
+  const tries=[
+    {...base, width:{ideal:640}, height:{ideal:480}},
+    {...base, width:{ideal:480}, height:{ideal:360}},
+    base,
+    {video:true}
+  ];
+  let last=null;
+  for(const v of tries){
+    try{
+      const s=await navigator.mediaDevices.getUserMedia({video:v,audio:false});
+      const track=s.getVideoTracks()[0];
+      const st=track.getSettings?.()||{};
+      if(!st.width&&!st.height){
+        s.getTracks().forEach(t=>{try{t.stop();}catch(_){}});
+        throw new Error("camera produced no video settings");
+      }
+      return s;
+    }catch(e){ last=e; if(e.name==="NotAllowedError") throw e; }
+  }
+  throw last;
+}
+
+async function refreshCameraList(){
+  try{
+    const cams=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    camSelect.replaceChildren();
+    cams.forEach((c,i)=>{
+      const o=document.createElement("option");
+      o.value=c.deviceId;
+      o.textContent=c.label||`Camera ${i+1}`;
+      camSelect.appendChild(o);
+    });
+    camPick.hidden=cams.length<2;
+  }catch{}
+}
+
+function waitForVideoMetadata(timeoutMs){
+  return new Promise(resolve=>{
+    if(video.videoWidth>0 && video.readyState>=1) return resolve(true);
+    const done=()=>{ cleanup(); resolve(video.videoWidth>0); };
+    const timer=setTimeout(()=>{ cleanup(); resolve(false); },timeoutMs);
+    function cleanup(){
+      clearTimeout(timer);
+      video.removeEventListener("loadedmetadata",done);
+      video.removeEventListener("playing",done);
+    }
+    video.addEventListener("loadedmetadata",done);
+    video.addEventListener("playing",done);
+  });
+}
+
+async function startCamera(deviceId){
+  diagOut.hidden=true;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    setStatus(receiveStatus, window.isSecureContext
+      ? "This browser exposes no camera API."
+      : "Camera access requires HTTPS or http://localhost. Opening the file via file:// blocks the camera on iOS and most browsers.","error");
+    diagnose(); return;
+  }
+  if(!window.isSecureContext){
+    setStatus(receiveStatus,"Camera access requires HTTPS or http://localhost. iOS Safari in particular will not allow the camera from file://.","error");
+    diagnose(); return;
+  }
+  try{
+    if(!receiver) receiver=newReceiver();
+
+    detector=null;
+    if("BarcodeDetector" in window){
+      try{ detector=new BarcodeDetector({formats:["qr_code"]}); }catch{ detector=null; }
+    }
+
+    const media=await getCameraStream(deviceId);
+    stream=media;
+
+    video.setAttribute("playsinline","");
+    video.setAttribute("webkit-playsinline","");
+    video.muted=true;
+    video.playsInline=true;
+    video.srcObject=stream;
+
+    try{ await video.play(); }
+    catch(e){
+      await new Promise(r=>setTimeout(r,60));
+      try{ await video.play(); }catch(_){}
+    }
+
+    const ok=await waitForVideoMetadata(4000);
+    if(!ok){
+      stream.getTracks().forEach(t=>{try{t.stop();}catch(_){}});
+      stream=null; video.srcObject=null;
+      setStatus(receiveStatus,"Camera opened but no video frames arrived. Close other apps that use the camera, then try again.","error");
+      diagnose(); return;
+    }
+
+    await refreshCameraList();
+    const st=stream.getVideoTracks()[0]?.getSettings?.();
+    if(st&&st.deviceId){
+      const opt=Array.from(camSelect.options).find(o=>o.value===st.deviceId);
+      if(opt) camSelect.value=opt.value;
+    }
+
+    receiver.scanning=true;
+    receiver.paused=false;
+    startScan.disabled=true;
+    pauseScan.disabled=false;
+    pauseScan.textContent="Pause";
+    scanPlaceholder.style.display="none";
+    scanDot.classList.remove("off");
+    acquireWakeLock();
+    setStatus(receiveStatus,"Scanning. Hold the sender’s QR code inside the guide.","ok");
+    scanLoop();
+  }catch(e){
+    if(receiver) receiver.scanning=false;
+    stopCamera();
+    setStatus(receiveStatus,describeCamError(e),"error");
+    diagnose();
+  }
+}
+
+async function assembleFile(){
+  const r=receiver;
+  if(!r||!r.manifest||r.chunks.size!==r.manifest.c){
+    setStatus(receiveStatus,"More frames are still needed before assembling.","warn");
+    return;
+  }
+  setStatus(receiveStatus,"Assembling file and checking the final SHA-256 checksum…","");
+  try{
+    const parts=[];
+    let size=0;
+    for(let i=0;i<r.manifest.c;i++){
+      const a=r.chunks.get(i);
+      if(!a) throw new Error(`missing chunk ${i}`);
+      parts.push(a);
+      size+=a.length;
+    }
+    if(size!==r.manifest.z) throw new Error(`size mismatch (${size} vs ${r.manifest.z})`);
+    const blob=new Blob(parts,{type:r.manifest.t});
+    const hash=await sha256Hex(blob);
+    if(hash!==r.manifest.h) throw new Error("SHA-256 mismatch — the file was corrupted in transit. Press Reset and scan again.");
+    if(objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl=URL.createObjectURL(blob);
+    downloadLink.href=objectUrl;
+    downloadLink.download=r.manifest.n||"received-file";
+    downloadLink.style.display="inline-flex";
+    stopCamera();
+    r.scanning=false;
+    r.paused=true;
+    startScan.disabled=false;
+    pauseScan.disabled=true;
+    pauseScan.textContent="Pause";
+    setStatus(receiveStatus,"Verified successfully. Your reconstructed file is ready to download.","ok");
+  }catch(e){
+    r.complete=false;
+    setStatus(receiveStatus,`Verification failed: ${e.message}`,"error");
+  }
+}
+
+startScan.addEventListener("click",async()=>{
+  try{ await startCamera(); }
+  catch(e){ console.error("startCamera threw:",e); }
+});
+diagnoseBtn.addEventListener("click",diagnose);
+camSelect.addEventListener("change",async()=>{
+  if(receiver) receiver.scanning=false;
+  stopCamera();
+  await startCamera(camSelect.value);
+});
+pauseScan.addEventListener("click",()=>{
+  if(!receiver) return;
+  receiver.paused=!receiver.paused;
+  pauseScan.textContent=receiver.paused?"Resume":"Pause";
+  if(receiver.paused){
+    setStatus(receiveStatus,"Scanning paused. The camera stays ready.","warn");
+  }else{
+    setStatus(receiveStatus,"Scanning resumed.","ok");
+    acquireWakeLock();
+    scanLoop();
+  }
+});
+resetReceive.addEventListener("click",()=>{
+  stopCamera();
+  receiver=newReceiver();
+  if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+  downloadLink.style.display="none";
+  downloadLink.removeAttribute("href");
+  startScan.disabled=false;
+  pauseScan.disabled=true;
+  pauseScan.textContent="Pause";
+  scanPlaceholder.style.display="grid";
+  receiveMeter.style.width="0%";
+  receiveProgress.textContent="0%";
+  receiveSession.textContent="—";
+  receiveRate.textContent="—";
+  receiveCounts.textContent="0 / —";
+  missing.textContent="The sender continuously replays its frames, so missing frames are picked up on later passes.";
+  setStatus(receiveStatus,"Reset. Start the camera and scan the sender’s QR code.","");
+});
+importFrame.addEventListener("click",()=>{
+  const raw=manualFrame.value.trim();
+  if(!raw){ manualResult.textContent="Paste a frame first."; manualResult.style.color="#ffda89"; return; }
+  if(!parseFrame(raw)){ manualResult.textContent="Not a valid OFT1 frame"; manualResult.style.color="#ff9eab"; return; }
+  const ok=acceptFrame(raw);
+  manualResult.textContent=ok?"Accepted":"Rejected (checksum or session mismatch)";
+  manualResult.style.color=ok?"#83e8bd":"#ff9eab";
+  if(ok) manualFrame.value="";
+});
+
+(function(){
+  const notes=[];
+  if(!window.isSecureContext) notes.push("<strong>Camera note:</strong> this page is not in a secure context, so browsers will block camera scanning. Serve it over <code>https://</code> or <code>http://localhost</code> on the receiving device. Sending still works fully offline.");
+  if(notes.length) $("contextNotice").innerHTML=notes.join(" ");
+})();
+</script>
+</body>
+</html>
